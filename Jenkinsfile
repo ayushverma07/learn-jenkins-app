@@ -23,12 +23,13 @@ pipeline {
             agent{
                 docker{
                     image 'node:18-alpine'
+                    reuseNode true
                 }
             }
             steps{
                 sh '''
                     echo "Test stage"
-                    find /var/jenkins_home/workspace/learn-jenkins-app/build -name index.html
+                    test -f build/index.html
                     npm test
                 '''
             }
