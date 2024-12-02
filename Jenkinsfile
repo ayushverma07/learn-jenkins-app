@@ -1,8 +1,13 @@
 pipeline {
     agent any
 
+    environment {
+        NETLIFY_SITE_ID = 'a3f457b7-186d-4b58-8f53-51ae7dbeab35'
+        NETLIFY_AUTH_TOKEN = credentials('Netlify-token for Jenkins	')
+    }
+
     stages {
-        /*stage('Build') {
+        stage('Build') {
             agent{
                 docker{
                     image 'node:18-alpine'
@@ -18,11 +23,11 @@ pipeline {
                     npm run build
                 '''
             }
-        }*/
+        }
 
-        stage('Run Tests'){
+        stage('Tests'){
             parallel{
-                stage('Test'){
+                stage('Unit tests'){
                     agent {
                         docker{
                             image 'node:18-alpine'
@@ -68,6 +73,25 @@ pipeline {
                             publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright HTML Report', reportTitles: '', useWrapperFileDirectly: true])
                         }
                     }
+                }
+            }
+
+            stage('Deploy') {
+                agent{
+                    docker{
+                        image 'node:18-alpine'
+                        reuseNode true
+                    }
+                }
+
+                steps {
+                    sh '''
+                        npm install netlify-cli
+                        node_modules/.bin/netlify --version
+                        echo "Deploying to production. Site ID = $NETLIFY_SITE_ID"
+                        node_modules/.bin/netlify status
+                        node_modules/.bin/netlify deploy --dir=build --prod
+                    '''
                 }
             }
         }   
