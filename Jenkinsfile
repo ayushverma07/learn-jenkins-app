@@ -5,6 +5,7 @@ pipeline {
         NETLIFY_SITE_ID = 'a3f457b7-186d-4b58-8f53-51ae7dbeab35'
         NETLIFY_AUTH_TOKEN = credentials('8df6ce80-e690-44a1-86ec-805032dd8080')
         REACT_APP_VERSION = "1.0.$BUILD_ID"
+        
     }
 
     stages {
@@ -122,6 +123,7 @@ pipeline {
             }
         }
 
+        /*
         stage('Deploy prod') {
             agent {
                 docker {
@@ -149,6 +151,29 @@ pipeline {
                 always {
                     publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Prod E2E', reportTitles: '', useWrapperFileDirectly: true])
                 }
+            }
+        }*/
+
+        stage('Deploy Prod to AWS') {
+            agent {
+                docker {
+                    image 'amazon/aws-cli'
+                    reuseNode true
+                    args "--entrypoint=''"
+                }
+            }
+
+            environment {
+                AWS_S3_BUCKET = 'learn-jenkins-202412050732'
+            }
+
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'AWS-Access-Key', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
+                    sh '''
+                        aws --version
+                        aws s3 sync build s3://$AWS_S3_BUCKET
+                    '''
+                }                
             }
         }
     }
