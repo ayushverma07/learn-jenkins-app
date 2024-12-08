@@ -185,7 +185,7 @@ pipeline {
         */
 
         
-        stage ('Build Docker image') {
+        stage ('Build Docker image and push to Amazon ECR') {
             agent {
                 docker {
                     image 'my-aws-cli'
@@ -222,6 +222,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'AWS-Access-Key', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
                     sh '''
                         aws --version
+                        sed -i "s/#APP_VERSION#/$REACT_APP_VERSION/g" AWS-LearnJenkins/task-definition-prod.json
                         LATEST_TD_REVISION=$(aws ecs register-task-definition --cli-input-json file://AWS-LearnJenkins/task-definition-prod.json | jq '.taskDefinition.revision')
                         echo $LATEST_TD_REVISION
                         aws ecs update-service --cluster $AWS_ECS_CLUSTER --service $AWS_ECS_SERVICE_PROD --task-definition $AWS_ECS_TD_PROD:$LATEST_TD_REVISION
