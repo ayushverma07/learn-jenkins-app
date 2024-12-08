@@ -6,7 +6,7 @@
     "containerDefinitions": [
         {
             "name": "LearnJenkinsApp",
-            "image": "nginx:1.26-alpine",
+            "image": "nginx:1.27-alpine",
             "portMappings": [{
                 "name": "nginx-80-tcp",
                 "containerPort": 80,
