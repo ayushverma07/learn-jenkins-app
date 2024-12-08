@@ -188,6 +188,10 @@ pipeline {
                 }
             }
 
+            environment {
+                LATEST_TD_REVISION = 'Revision_to_be_set'
+            }
+
             steps{
                 withCredentials([usernamePassword(credentialsId: 'AWS-Access-Key', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
                     sh '''
@@ -196,6 +200,7 @@ pipeline {
                         LATEST_TD_REVISION = $(aws ecs register-task-definition --cli-input-json file://AWS-LearnJenkins/task-definition-prod.json | jq '.taskDefinition.revision')
                         echo $LATEST_TD_REVISION
                         aws ecs update-service --cluster learn-jenkins --service LearnJenkinsApp-Service-Prod --task-definition LearnJenkinsApp-TaskDefinition-Prod:$LATEST_TD_REVISION
+                        aws ecs wait services-stable --cluster learn-jenkins --services LearnJenkinsApp-Service-Prod
                     '''
                 }        
             }   
