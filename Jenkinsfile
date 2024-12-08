@@ -192,6 +192,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'AWS-Access-Key', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
                     sh '''
                         aws --version
+                        docker run --rm amazon/aws-cli cat /etc/os-release
                         apk add --no-cache jq
                         LATEST_TD_REVISION = $(aws ecs register-task-definition --cli-input-json file://AWS-LearnJenkins/task-definition-prod.json | jq '.taskDefinition.revision')
                         echo $LATEST_TD_REVISION
