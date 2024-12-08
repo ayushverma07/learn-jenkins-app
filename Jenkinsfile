@@ -15,7 +15,7 @@ pipeline {
 
     stages {
 
-        /*stage('Docker') {
+        stage('Docker') {
             steps {
                 sh 'docker build -t my-playwright .'
             }
@@ -126,7 +126,7 @@ pipeline {
                     input message: 'Do you wish to deploy to production?', ok: 'Yes, I am sure!'
                 }
             }
-        }*/
+        }
 
         /*
         stage('Deploy prod to netlify') {
