@@ -5,12 +5,12 @@ pipeline {
         NETLIFY_SITE_ID = 'a3f457b7-186d-4b58-8f53-51ae7dbeab35'
         NETLIFY_AUTH_TOKEN = credentials('8df6ce80-e690-44a1-86ec-805032dd8080')
         REACT_APP_VERSION = "1.0.$BUILD_ID"
-        
+        AWS_DEFAULT_REGION = 'ap-south-1'
     }
 
     stages {
 
-        stage('Docker') {
+        /*stage('Docker') {
             steps {
                 sh 'docker build -t my-playwright .'
             }
@@ -121,10 +121,10 @@ pipeline {
                     input message: 'Do you wish to deploy to production?', ok: 'Yes, I am sure!'
                 }
             }
-        }
+        }*/
 
         /*
-        stage('Deploy prod') {
+        stage('Deploy prod to netlify') {
             agent {
                 docker {
                     image 'my-playwright'
@@ -154,7 +154,8 @@ pipeline {
             }
         }*/
 
-        stage('Deploy Prod to AWS') {
+        /*
+        stage('Deploy Prod to AWS S3') {
             agent {
                 docker {
                     image 'amazon/aws-cli'
@@ -175,6 +176,29 @@ pipeline {
                     '''
                 }                
             }
+        }
+        */
+
+        stage('Deploy Prod to AWS ECS Fargate') {
+            agent {
+                docker {
+                    image 'amazon/aws-cli'
+                    reuseNode true
+                    args "-u root --entrypoint=''"
+                }
+            }
+
+            steps{
+                withCredentials([usernamePassword(credentialsId: 'AWS-Access-Key', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
+                    sh '''
+                        aws --version
+                        yum install jq -y
+                        LATEST_TD_REVISION = $(aws ecs register-task-definition --cli-input-json file://AWS-LearnJenkins/task-definition-prod.json | jq '.taskDefinition.revision')
+                        echo $LATEST_TD_REVISION
+                        aws ecs update-service --cluster learn-jenkins --service LearnJenkinsApp-Service-Prod --task-definition LearnJenkinsApp-TaskDefinition-Prod:$LATEST_TD_REVISION
+                    '''
+                }        
+            }   
         }
     }
 }

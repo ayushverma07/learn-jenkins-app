@@ -1,0 +1,25 @@
+{
+    "requiresCompatibilities": [
+        "EC2"
+    ],
+    "family": "LearnJenkinsApp-TaskDefinition-Prod",
+    "containerDefinitions": [
+        {
+            "name": "LearnJenkinsApp",
+            "image": "nginx:1.26-alpine",
+            "portMappings": [{
+                "name": "nginx-80-tcp",
+                "containerPort": 80,
+                "hostPort": 80,
+                "protocol": "tcp",
+                "appProtocol": "http"
+            }],
+            "essential": true
+        }
+    ],
+    "volumes": [],
+    "networkMode": "awsvpc",
+    "memory": "512",
+    "cpu": ".25 vCPU",
+    "executionRoleArn": ""
+}
