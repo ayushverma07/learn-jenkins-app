@@ -5,7 +5,8 @@ pipeline {
 
         stage('Docker') {
             steps {
-                sh 'docker build -t my-playwright .'
+                sh 'docker build -f Dockerfile-playwright -t my-playwright .'
+                sh 'docker build -f Dockerfile-aws-cli -t my-aws-cli .'
             }
         }
     }
